@@ -80,6 +80,61 @@ const operations: Operation[] = [
     method: "DELETE",
     fields: { id: "input" },
   },
+  {
+    name: "Create Comment",
+    endpoint: "/api/posts/:postId/comments",
+    method: "POST",
+    fields: { id: "input", content: "input" },
+  },
+  {
+    name: "Get Comments for Post",
+    endpoint: "/api/posts/:postId/comments",
+    method: "GET",
+    fields: { id: "input" },
+  },
+  {
+    name: "Delete Comment",
+    endpoint: "/api/comments/:id",
+    method: "DELETE",
+    fields: { id: "input" },
+  },
+  {
+    name: "Get Events",
+    endpoint: "/api/schedule/events",
+    method: "GET",
+    fields: {}, // No specific fields are required to get all events
+  },
+  {
+    name: "Create Event",
+    endpoint: "/api/schedule/events",
+    method: "POST",
+    fields: {
+      name: "input", // Event name
+      startTime: "input", // Event start time
+      endTime: "input", // Event end time
+      type: "input", // Event type: "focus" or "social"
+    },
+  },
+  {
+    name: "Update Event",
+    endpoint: "/api/schedule/events/:id",
+    method: "PATCH",
+    fields: {
+      id: "input", // Event ID
+      name: "input", // Optional: Event name
+      startTime: "input", // Optional: New start time
+      endTime: "input", // Optional: New end time
+      type: "input", // Optional: New event type: "focus" or "social"
+    },
+  },
+  {
+    name: "Delete Event",
+    endpoint: "/api/schedule/events/:id",
+    method: "DELETE",
+    fields: {
+      id: "input", // Event ID to delete
+    },
+  },
   //
   // ...
   //

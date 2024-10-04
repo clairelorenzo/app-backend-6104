@@ -2,12 +2,13 @@ import { ObjectId } from "mongodb";
 
 import { Router, getExpressRouter } from "./framework/router";
 
-import { Authing, Friending, Posting, Sessioning } from "./app";
+import { Authing, Commenting, Friending, Posting, Scheduling, Sessioning } from "./app";
 import { PostOptions } from "./concepts/posting";
 import { SessionDoc } from "./concepts/sessioning";
 import Responses from "./responses";
 
 import { z } from "zod";
+import { CommentOptions } from "./concepts/commenting";
 
 /**
  * Web server routes for the app. Implements synchronizations between concepts.
@@ -152,7 +153,152 @@ class Routes {
     const fromOid = (await Authing.getUserByUsername(from))._id;
     return await Friending.rejectRequest(fromOid, user);
   }
+  @Router.get("/posts/:postId/comments")
+  @Router.validate(z.object({ postId: z.string() }))
+  async getComments(postId: string) {
+    const postObjectId = new ObjectId(postId);
+    const comments = await Commenting.getCommentsForPost(postObjectId);
+    return Responses.comments(comments);
+  }
+  @Router.post("/posts/:postId/comments")
+  @Router.validate(z.object({ postId: z.string(), content: z.string().min(1) }))
+  async createComment(session: SessionDoc, postId: string, content: string, options?: CommentOptions) {
+    const user = Sessioning.getUser(session);
+    const postObjectId = new ObjectId(postId);
+    const created = await Commenting.create(postObjectId, user, content, options);
+    return { msg: created.msg, comment: await Responses.comment(created.comment) };
+  }
+
+  @Router.patch("/comments/:id")
+  @Router.validate(z.object({ id: z.string(), content: z.string().optional() }))
+  async updateComment(session: SessionDoc, id: string, content?: string, options?: CommentOptions) {
+    const user = Sessioning.getUser(session);
+    const commentObjectId = new ObjectId(id);
+    await Commenting.assertAuthorIsUser(commentObjectId, user);
+    return await Commenting.update(commentObjectId, content, options);
+  }
+
+  @Router.delete("/comments/:id")
+  @Router.validate(z.object({ id: z.string() }))
+  async deleteComment(session: SessionDoc, id: string) {
+    const user = Sessioning.getUser(session);
+    const commentObjectId = new ObjectId(id);
+    await Commenting.assertAuthorIsUser(commentObjectId, user);
+    return await Commenting.delete(commentObjectId);
+  }
+  @Router.get("/events")
+  async getEvents(session: SessionDoc) {
+    const user = Sessioning.getUser(session);
+    const events = await Scheduling.getEventsByUser(user);
+    return Responses.events(events);
+  }
+
+  @Router.post("/events")
+  @Router.validate(
+    z.object({
+      name: z.string().min(1),
+      startTime: z.string(), // Assuming ISO date string
+      endTime: z.string(),
+      type: z.enum(["focus", "social"]),
+    }),
+  )
+  async createEvent(session: SessionDoc, name: string, startTime: string, endTime: string, type: "focus" | "social") {
+    const user = Sessioning.getUser(session);
+    const created = await Scheduling.create(user, name, new Date(startTime), new Date(endTime), { type });
+    return { msg: created.msg, event: await Responses.event(created.event) };
+  }
+
+  @Router.patch("/events/:id")
+  @Router.validate(
+    z.object({
+      id: z.string(),
+      name: z.string().optional(),
+      startTime: z.string().optional(),
+      endTime: z.string().optional(),
+      type: z.enum(["focus", "social"]).optional(),
+    }),
+  )
+  async updateEvent(session: SessionDoc, id: string, name?: string, startTime?: string, endTime?: string, type?: "focus" | "social") {
+    const user = Sessioning.getUser(session);
+    const eventId = new ObjectId(id);
+    await Scheduling.assertUserIsOwner(eventId, user);
+    return await Scheduling.update(eventId, name, startTime ? new Date(startTime) : undefined, endTime ? new Date(endTime) : undefined, { type });
+  }
+
+  @Router.delete("/events/:id")
+  async deleteEvent(session: SessionDoc, id: string) {
+    const user = Sessioning.getUser(session);
+    const eventId = new ObjectId(id);
+    await Scheduling.assertUserIsOwner(eventId, user);
+    return await Scheduling.delete(eventId);
+  }
 }
+
+// Outline of remaining routes
+
+// GOALS
+// @Router.get("/goals")
+//   async getEvents(session: SessionDoc) {
+//     const user = Sessioning.getUser(session);
+//     const events = await GoalSetting.getGoalsByUser(user);
+//     return Responses.goals(goals);
+//   }
+
+//   @Router.post("/go")
+//   @Router.validate(
+//     z.object({
+//       content: z.string().min(1),
+//     }),
+//   )
+//   async createGoal(session: SessionDoc, content: string) {
+//     const user = Sessioning.getUser(session);
+//     const created = await GoalSetting.create(user, content);
+//     return { msg: created.msg, event: await Responses.event(created.event) };
+//   }
+
+//   @Router.patch("/goals/:id")
+//   @Router.validate(
+//     z.object({
+//       id: z.string(),
+//       content: z.string()
+//     }),
+//   )
+
+//   @Router.delete("/gols/:id")
+//   async deleteEvent(session: SessionDoc, id: string) {
+//     const user = Sessioning.getUser(session);
+//     const goalId = new ObjectId(id);
+//     await Scheduling.assertUserIsOwner(goalId, user);
+//     return await Scheduling.delete(eventId);
+//   }
+
+// Message
+// @Router.get("/goals")
+//   async getMessages(session: SessionDoc) {
+//     const user = Sessioning.getUser(session);
+//     const messages = await Messaging.getMessagesbyUser(user);
+//     return Responses.goals(goals);
+//   }
+
+//   @Router.post("/go")
+//   @Router.validate(
+//     z.object({
+//       content: z.string().min(1),
+//     }),
+//   )
+//   async sendMessage(session: SessionDoc, content: string, to:string ) {
+//     const user = Sessioning.getUser(session);
+//     const created = await Messaging.create(user, content, to);
+//     return { msg: created.msg, event: await Responses.event(created.event) };
+//   }
+
+//   @Router.patch("/goals/:id")
+//   @Router.validate(
+//     z.object({
+//       content: z.string()
+//       to: z.string()
+//     }),
+//   )
 
 /** The web app. */
 export const app = new Routes();
