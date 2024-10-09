@@ -38,13 +38,13 @@ export default class SchedulingConcept {
     return await this.events.readMany({ user }, { sort: { startTime: 1 } }); // Sorted by start time
   }
 
-  // Update an event
+  // Update  event
   async update(_id: ObjectId, name?: string, startTime?: Date, endTime?: Date, options?: EventOptions) {
     await this.events.partialUpdateOne({ _id }, { name, startTime, endTime, options });
     return { msg: "Event successfully updated!" };
   }
 
-  // Delete an event
+  // Delete event
   async delete(_id: ObjectId) {
     await this.events.deleteOne({ _id });
     return { msg: "Event deleted successfully!" };

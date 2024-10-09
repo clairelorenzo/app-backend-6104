@@ -82,13 +82,13 @@ const operations: Operation[] = [
   },
   {
     name: "Create Comment",
-    endpoint: "/api/posts/:postId/comments",
+    endpoint: "/api/comments/:postId",
     method: "POST",
-    fields: { id: "input", content: "input" },
+    fields: { postId: "input", content: "input" },
   },
   {
     name: "Get Comments for Post",
-    endpoint: "/api/posts/:postId/comments",
+    endpoint: "/api/comments/:postId",
     method: "GET",
     fields: { id: "input" },
   },

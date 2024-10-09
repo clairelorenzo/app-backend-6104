@@ -160,10 +160,12 @@ class Routes {
     const comments = await Commenting.getCommentsForPost(postObjectId);
     return Responses.comments(comments);
   }
-  @Router.post("/posts/:postId/comments")
+  @Router.post("/comments/:postId")
   @Router.validate(z.object({ postId: z.string(), content: z.string().min(1) }))
   async createComment(session: SessionDoc, postId: string, content: string, options?: CommentOptions) {
+    console.log("hey");
     const user = Sessioning.getUser(session);
+    console.log("hey again");
     const postObjectId = new ObjectId(postId);
     const created = await Commenting.create(postObjectId, user, content, options);
     return { msg: created.msg, comment: await Responses.comment(created.comment) };
