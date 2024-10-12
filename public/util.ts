@@ -82,15 +82,15 @@ const operations: Operation[] = [
   },
   {
     name: "Create Comment",
-    endpoint: "/api/comments/:postId",
+    endpoint: "/api/comments/",
     method: "POST",
     fields: { postId: "input", content: "input" },
   },
   {
     name: "Get Comments for Post",
-    endpoint: "/api/comments/:postId",
+    endpoint: "/api/comments",
     method: "GET",
-    fields: { id: "input" },
+    fields: { postId: "input" },
   },
   {
     name: "Delete Comment",
@@ -100,13 +100,13 @@ const operations: Operation[] = [
   },
   {
     name: "Get Events",
-    endpoint: "/api/schedule/events",
+    endpoint: "/api/events",
     method: "GET",
-    fields: {}, // No specific fields are required to get all events
+    fields: { author: "input" }, // No specific fields are required to get all events
   },
   {
     name: "Create Event",
-    endpoint: "/api/schedule/events",
+    endpoint: "/api/events",
     method: "POST",
     fields: {
       name: "input", // Event name
@@ -116,20 +116,50 @@ const operations: Operation[] = [
     },
   },
   {
+    name: "Update Post",
+    endpoint: "/api/posts/:id",
+    method: "PATCH",
+    fields: { id: "input", content: "input", options: { backgroundColor: "input" } },
+  },
+  {
     name: "Update Event",
-    endpoint: "/api/schedule/events/:id",
+    endpoint: "/api/events/:id",
     method: "PATCH",
     fields: {
       id: "input", // Event ID
       name: "input", // Optional: Event name
       startTime: "input", // Optional: New start time
       endTime: "input", // Optional: New end time
-      type: "input", // Optional: New event type: "focus" or "social"
+      options: { type: "input" }, // Optional: New event type: "focus" or "social"
     },
   },
   {
     name: "Delete Event",
-    endpoint: "/api/schedule/events/:id",
+    endpoint: "/api/events/:id",
+    method: "DELETE",
+    fields: {
+      id: "input", // Event ID to delete
+    },
+  },
+  {
+    name: "Get Goals",
+    endpoint: "/api/goals",
+    method: "GET",
+    fields: { author: "input" }, // No specific fields are required to get all events
+  },
+  {
+    name: "Create Goal",
+    endpoint: "/api/goals",
+    method: "POST",
+    fields: {
+      author: "input", // Event name
+      content: "input", // Event start time
+      options: { completed: "input" }, // Event end time
+    },
+  },
+  {
+    name: "Delete Goal",
+    endpoint: "/api/goals/:id",
     method: "DELETE",
     fields: {
       id: "input", // Event ID to delete

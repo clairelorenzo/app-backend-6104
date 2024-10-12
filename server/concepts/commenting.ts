@@ -34,7 +34,9 @@ export default class CommentingConcept {
 
   async getCommentsForPost(postId: ObjectId) {
     // Returns all comments for a given post
-    return await this.comments.readMany({ postId }, { sort: { _id: -1 } });
+    ("");
+
+    return await this.comments.readMany({ postId: postId });
   }
 
   async getByAuthor(author: ObjectId) {

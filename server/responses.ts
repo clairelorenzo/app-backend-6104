@@ -1,6 +1,7 @@
 import { Authing } from "./app";
 import { CommentDoc } from "./concepts/commenting";
 import { AlreadyFriendsError, FriendNotFoundError, FriendRequestAlreadyExistsError, FriendRequestDoc, FriendRequestNotFoundError } from "./concepts/friending";
+import { GoalDoc } from "./concepts/goal_setting";
 import { PostAuthorNotMatchError, PostDoc } from "./concepts/posting";
 import { EventDoc } from "./concepts/scheduling";
 import { Router } from "./framework/router";
@@ -62,6 +63,17 @@ export default class Responses {
     }
     const user = await Authing.getUserById(event.user);
     return { ...event, user: user.username };
+  }
+  static async goal(goal: GoalDoc | null) {
+    if (!goal) {
+      return goal;
+    }
+    const author = await Authing.getUserById(goal.author);
+    return { ...goal, author: author.username };
+  }
+  static async goals(goals: GoalDoc[]) {
+    const authors = await Authing.idsToUsernames(goals.map((goal) => goal.author));
+    return goals.map((goal, i) => ({ ...goal, author: authors[i] }));
   }
 
   /**

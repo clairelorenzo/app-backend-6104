@@ -9,8 +9,8 @@ export interface EventOptions {
 export interface EventDoc extends BaseDoc {
   user: ObjectId; // Reference to the user who created the event
   name: string;
-  startTime: Date;
-  endTime: Date;
+  startTime: string;
+  endTime: string;
   options: EventOptions;
 }
 
@@ -28,7 +28,7 @@ export default class SchedulingConcept {
   }
 
   // Create a new event
-  async create(user: ObjectId, name: string, startTime: Date, endTime: Date, options: EventOptions) {
+  async create(user: ObjectId, name: string, startTime: string, endTime: string, options: EventOptions) {
     const _id = await this.events.createOne({ user, name, startTime, endTime, options });
     return { msg: "Event successfully created!", event: await this.events.readOne({ _id }) };
   }
@@ -39,7 +39,7 @@ export default class SchedulingConcept {
   }
 
   // Update  event
-  async update(_id: ObjectId, name?: string, startTime?: Date, endTime?: Date, options?: EventOptions) {
+  async update(_id: ObjectId, name?: string, startTime?: string, endTime?: string, options?: EventOptions) {
     await this.events.partialUpdateOne({ _id }, { name, startTime, endTime, options });
     return { msg: "Event successfully updated!" };
   }
